@@ -87,14 +87,12 @@ WHERE stopa.name = 'Craiglockhart';
 -- Show the bus no. and company for the first bus, the name of the stop for the transfer,
 -- and the bus no. and company for the second bus
 
-SELECT DISTINCT a.num AS 'num',
-  a.company AS 'company', stopb.name AS 'name',
-  c.num   AS 'num', c.company  AS 'company'
-FROM route a
-  JOIN route b ON (a.company = b.company AND a.num = b.num)
-  JOIN ( route c JOIN route d ON (c.company = d.company AND c.num= d.num))
-  JOIN stops stopa ON (a.stop = stopa.id)
-  JOIN stops stopb ON (b.stop = stopb.id)
-  JOIN stops stopc ON (c.stop = stopc.id)
-  JOIN stops stopd ON (d.stop = stopd.id) 
-WHERE stopa.name = 'Craiglockhart' AND stopd.name = 'Lochend' AND stopb.name = stopc.name;
+SELECT bus1.busnumber AS 'num', bus1.company, bus2.transfer AS 'name', bus2.busnumber AS 'num', bus2.company
+  FROM (SELECT r1.num AS 'busnumber', r1.company AS 'company', r2.stop AS 'stopp' FROM route r1
+  JOIN route r2 ON (r1.num = r2.num AND r1.company = r2.company) JOIN stops s1 ON s1.id = r1.stop
+  JOIN stops s2 ON s2.id = r2.stop WHERE s1.name = 'Craiglockhart') bus1
+  JOIN
+  (SELECT s1.name AS 'transfer', r1.num AS 'busnumber', r1.company AS 'company', r1.stop AS 'stopp', r1.pos AS 'pos'
+  FROM route r1 JOIN route r2 ON (r1.num = r2.num AND r1.company = r2.company) JOIN stops s1 ON s1.id = r1.stop
+  JOIN stops s2 ON s2.id = r2.stop WHERE s2.name = 'Lochend') bus2
+  ON bus1.stopp = bus2.stopp ORDER BY bus1.busnumber, name, 4;
